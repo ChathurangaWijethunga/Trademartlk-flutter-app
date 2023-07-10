@@ -14,20 +14,19 @@ class MyWebsite extends StatefulWidget {
 }
 
 class _MyWebsiteState extends State<MyWebsite> {
-  double _progress = 0;
   late InAppWebViewController inAppWebViewController;
   bool _showSplash = true;
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   late SharedPreferences _sessionPrefs;
   final String _sessionKey = 'app_session';
-
+ 
   @override
   void initState() {
     super.initState();
     _initializeSessionPrefs();
     // Simulate a delay for the splash screen
-    Future.delayed(const Duration(seconds: 5), () {
+    Future.delayed(const Duration(seconds: 5 , milliseconds:5 ), () {
       setState(() {
         _showSplash = false;
         _updateSessionStart();
@@ -48,7 +47,7 @@ class _MyWebsiteState extends State<MyWebsite> {
     final sessionStartString = _sessionPrefs.getString(_sessionKey);
     if (sessionStartString != null) {
       final sessionStart = DateTime.parse(sessionStartString);
-      const sessionDuration = Duration(minutes: 5);
+      const sessionDuration = Duration(minutes: 15);
       final sessionEnd = sessionStart.add(sessionDuration);
       final now = DateTime.now();
       return now.isAfter(sessionEnd);
@@ -75,20 +74,14 @@ class _MyWebsiteState extends State<MyWebsite> {
             children: [
               InAppWebView(
                 initialUrlRequest: URLRequest(
-                  url: Uri.parse("https://www.trademartlk.com/manager/"),
+                  url: Uri.parse("https://www.trademartlk.com/V03/manager/"),
                 ),
                 onWebViewCreated: (InAppWebViewController controller) {
                   inAppWebViewController = controller;
                 },
-                onProgressChanged:
-                    (InAppWebViewController controller, int progress) {
-                  setState(() {
-                    _progress = progress / 100;
-                  });
-                },
                 initialOptions: InAppWebViewGroupOptions(
                   android: AndroidInAppWebViewOptions(
-                    cacheMode: AndroidCacheMode.LOAD_DEFAULT,
+                    cacheMode: AndroidCacheMode.LOAD_CACHE_ELSE_NETWORK,
                     allowFileAccess: true,
                   ),
                   ios: IOSInAppWebViewOptions(
@@ -99,24 +92,33 @@ class _MyWebsiteState extends State<MyWebsite> {
                   DefaultCacheManager().downloadFile(url!.toString());
                 },
               ),
-              if (_showSplash)
-                Container(
-                  color: Colors.white, // Customize the color of the splash screen
-                  child: Center(
-                    child: Lottie.network(
-                      'https://assets1.lottiefiles.com/packages/lf20_gc1urfuj.json', // Replace with your Lottie animation URL
-                    ),
-                  ),
-                )
-              else if (_progress < 1)
-                // ignore: avoid_unnecessary_containers
-                Container(
-                  child: LinearProgressIndicator(
-                    value: _progress,
-                  ),
-                )
-              else
-                const SizedBox(),
+               if (_showSplash)
+  Container(
+    color: Colors.white,
+    child: Stack(
+      children: [
+        Center(
+          child: Lottie.asset(
+            'assets/vehicle.json',
+          ),
+        ),
+        const Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              '© IDEAL Motors (Pvt) Ltd.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black54,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  ),
+
             ],
           ),
         ),
